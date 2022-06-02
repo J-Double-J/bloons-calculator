@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
 import 'dart:convert';
 
+//
+
 List<MonkeyTower> monkeyTowerFromJson(String str) => List<MonkeyTower>.from(
     json.decode(str).map((x) => MonkeyTower.fromJson(x)));
 
@@ -46,7 +48,7 @@ class MonkeyTower {
         "id": id,
         "name": name,
         "description": description,
-        "type": typeValues.reverse[type],
+        "type": typeValues.reverse?[type],
         "cost": cost.toJson(),
         "stats": stats.toJson(),
         "footprint": footprint,
@@ -91,20 +93,17 @@ class Paths {
     required this.paragon,
   });
 
-  List<Paragon> path1;
-  List<Paragon> path2;
-  List<Paragon> path3;
-  Paragon? paragon;
+  List<Path> path1;
+  List<Path> path2;
+  List<Path> path3;
+  Path? paragon;
 
   factory Paths.fromJson(Map<String, dynamic> json) => Paths(
-        path1:
-            List<Paragon>.from(json["path1"].map((x) => Paragon.fromJson(x))),
-        path2:
-            List<Paragon>.from(json["path2"].map((x) => Paragon.fromJson(x))),
-        path3:
-            List<Paragon>.from(json["path3"].map((x) => Paragon.fromJson(x))),
+        path1: List<Path>.from(json["path1"].map((x) => Path.fromJson(x))),
+        path2: List<Path>.from(json["path2"].map((x) => Path.fromJson(x))),
+        path3: List<Path>.from(json["path3"].map((x) => Path.fromJson(x))),
         paragon:
-            json["paragon"] == null ? null : Paragon.fromJson(json["paragon"]),
+            json["paragon"] == null ? null : Path.fromJson(json["paragon"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -115,8 +114,8 @@ class Paths {
       };
 }
 
-class Paragon {
-  Paragon({
+class Path {
+  Path({
     required this.name,
     required this.description,
     required this.cost,
@@ -132,7 +131,7 @@ class Paragon {
   List<String> effects;
   String source;
 
-  factory Paragon.fromJson(Map<String, dynamic> json) => Paragon(
+  factory Path.fromJson(Map<String, dynamic> json) => Path(
         name: json["name"],
         description: json["description"],
         cost: Cost.fromJson(json["cost"]),
@@ -188,7 +187,7 @@ class Stats {
         "type": type,
         "special": special == null
             ? null
-            : List<dynamic>.from(special.map((x) => x.toJson())),
+            : List<dynamic>.from(special!.map((x) => x.toJson())),
       };
 }
 
@@ -223,14 +222,12 @@ final typeValues = EnumValues({
 
 class EnumValues<T> {
   Map<String, T> map;
-  Map<T, String> reverseMap;
+  Map<T, String>? reverseMap;
 
   EnumValues(this.map);
 
-  Map<T, String> get reverse {
-    if (reverseMap ??= null) {
-      reverseMap = map.map((k, v) => MapEntry(v, k));
-    }
+  Map<T, String>? get reverse {
+    reverseMap ??= map.map((k, v) => new MapEntry(v, k));
     return reverseMap;
   }
 }

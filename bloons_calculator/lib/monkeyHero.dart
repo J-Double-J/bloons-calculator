@@ -5,10 +5,10 @@
 import 'package:meta/meta.dart';
 import 'dart:convert';
 
-List<MonkeyHero> monkeyTowerFromJson(String str) =>
+List<MonkeyHero> monkeyHeroFromJson(String str) =>
     List<MonkeyHero>.from(json.decode(str).map((x) => MonkeyHero.fromJson(x)));
 
-String monkeyTowerToJson(List<MonkeyHero> data) =>
+String monkeyHeroToJson(List<MonkeyHero> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class MonkeyHero {
@@ -267,7 +267,7 @@ class EnumValues<T> {
   EnumValues(this.map);
 
   Map<T, String>? get reverse {
-    reverseMap ??= map.map((k, v) => new MapEntry(v, k));
+    reverseMap ??= map.map((k, v) => MapEntry(v, k));
     return reverseMap;
   }
 }

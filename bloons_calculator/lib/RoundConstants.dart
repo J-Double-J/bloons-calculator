@@ -1,5 +1,5 @@
 class RoundConstants {
-  Map<int, int> roundCash = {
+  static Map<int, int> roundCash = {
     1: 121,
     2: 137,
     3: 138,
@@ -101,4 +101,14 @@ class RoundConstants {
     99: 2827,
     100: 1534
   };
+
+  static int getMaxRoundCash(int minRound, int roundNum) {
+    int cash = 650;
+
+    var roundVals = roundCash.values;
+    for (int i = minRound - 1; i < roundNum - 1; i++) {
+      cash += roundVals.elementAt(i);
+    }
+    return cash;
+  }
 }

@@ -1,6 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'monkeyTower.dart';
+import 'APIService.dart';
+import 'RoundConstants.dart';
+
+//TODO: Provider
 void main() {
   runApp(const MyApp());
 }
@@ -96,15 +103,63 @@ Widget toolInfoCard(BuildContext context) {
 }
 
 Widget monkeyListCard(BuildContext context) {
-  return Container(height: 400, color: Theme.of(context).cardColor);
+  final Future<List<MonkeyTower>> towers = APIService().getTowers();
+  return FutureBuilder(
+      future: towers,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return Column(children: [
+            Container(
+              height: 100,
+              width: 0.85 * MediaQuery.of(context).size.width,
+              color: Theme.of(context).secondaryHeaderColor,
+            ),
+            Container(
+                height: 100,
+                width: 0.85 * MediaQuery.of(context).size.width,
+                color: Theme.of(context).cardColor,
+                child: TextButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                    label: const Text(
+                      "Add Monkey",
+                      style: TextStyle(color: Colors.white),
+                    )))
+          ]);
+        } else {
+          return Container(height: 300, width: 300, color: Colors.red);
+        }
+      });
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   List<bool> isDiffSelected = [false, false, true, false, false];
+  int roundNum = 3;
+  int cashAvailable = 650;
+
+  final roundController = TextEditingController();
+  final _roundFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
+    roundController.text = findRoundInitVal(isDiffSelected);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    roundController.dispose();
+    super.dispose();
+  }
+
+  _updateCashAvailable() {
+    setState(() {
+      cashAvailable = RoundConstants.getMaxRoundCash(
+          int.parse(findRoundInitVal(isDiffSelected)), roundNum);
+    });
   }
 
   @override
@@ -117,19 +172,53 @@ class _MyHomePageState extends State<MyHomePage> {
         Center(child: toolInfoCard(context)),
         Container(
             padding: EdgeInsets.symmetric(
-                horizontal: 0.07 * MediaQuery.of(context).size.width),
+                horizontal: 0.08 * MediaQuery.of(context).size.width),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
+                Column(children: [
+                  SizedBox(
                     width: 100,
-                    height: 60,
-                    child: TextFormField(
-                      initialValue: findRoundInitVal(isDiffSelected),
-                      maxLength: 3,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    )),
+                    height: 50,
+                    child: Form(
+                      key: _roundFormKey,
+                      child: TextFormField(
+                        //key: _roundFormKey,
+                        controller: roundController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        decoration: const InputDecoration(
+                            errorStyle: TextStyle(height: 0)),
+                        validator: (value) {
+                          if (int.parse(value!) <
+                              int.parse(findRoundInitVal(isDiffSelected))) {
+                            return "";
+                          } else if (int.parse(value) > 100) {
+                            return "";
+                          } else if (value.isEmpty) {
+                            return "";
+                          }
+                          return null;
+                        },
+                        onChanged: (String? value) {
+                          if (_roundFormKey.currentState!.validate()) {
+                            log("Called!");
+                            setState(() {
+                              roundNum = int.parse(value!);
+                              _updateCashAvailable();
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                  Text(
+                    "Cash Available: $cashAvailable",
+                    style: const TextStyle(fontSize: 20),
+                  )
+                ]),
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 80),
                   child: ToggleButtons(
